@@ -3,9 +3,7 @@ from datetime import datetime
 #Selenium libraries
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.firefox.options import Options
 #BS4 libraries
 import requests
 import bs4
@@ -17,12 +15,16 @@ links = list()
 startTime = datetime.now()
 log = "" + str(startTime) + "- Script initiated\n"
 hrefList = list()
+username = "asdn9651" #USERNAME here
+password = "xohowib778@imailto.net" #PASSWORD here
 #endregion
 
 
 #region Functions
+
 def getAllATags():
-    #while True:
+    global log
+    log += str(datetime.now()) + "- Fetching tags \n"
     last_height = driver.execute_script("return document.body.scrollHeight")
     new_height = -1
     postNum = 0
@@ -35,22 +37,24 @@ def getAllATags():
                 hrefList.append(tagHREF)
                 postNum += 1
                 try:
-                    print postNum
+                    print postNum, " parsing"
+                    log += str(datetime.now()) + "- Parsing element "+ str(postNum) +"\n"
                     elementContentLinkGrab(item,postNum)
                 except Exception as e:
-                    print e
+                    log += str(datetime.now()) + "- Error parsing element \n"
 
         #now scrolling page
+        print "scrolling now"
         scrollDOWN()
         new_height = driver.execute_script("return document.body.scrollHeight") 
         if new_height == last_height:
+            print "no new content"
             break
         last_height = new_height
-    print "Gathered all A elements"
+    print "Gathered all links"
 
 def scrollDOWN():
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
- 
 
 def findElemType(elemen):
     #check type using Beautiful soup
@@ -72,16 +76,16 @@ def elementContentLinkGrab(singleElement, postNum):
     global log
     elemType = findElemType(singleElement)
     tagHREF = singleElement.get_attribute("href")[25:]
-    log += str(datetime.now()) + "- element type is "  + elemType + "\n"
+    #log += str(datetime.now()) + "- element type is "  + elemType + "\n"
     if elemType == "Video":
         singleElement.send_keys(Keys.ENTER)
         src = driver.find_element_by_tag_name('video').get_attribute('src')
         links.append([postNum, src])
-        log += str(datetime.now()) + "- element added successfully\n" 
+        log += str(datetime.now()) +"- " + str(postNum) + " link added successfully\n" 
     elif elemType == "Image":
         src = singleElement.find_element_by_tag_name('img').get_attribute('src')
         links.append([postNum,src])
-        log += str(datetime.now()) + "- element added successfully\n" 
+        log += str(datetime.now()) +"- " + str(postNum) + " link added successfully\n" 
     elif elemType == "Carousel":
         singleElement.send_keys(Keys.ENTER)
         carouselPath = driver.find_element_by_xpath("html/body/div[3]/div[2]/div/article/div[1]/div/div/div[2]/div/div/div/ul")
@@ -115,20 +119,17 @@ def elementContentLinkGrab(singleElement, postNum):
             if item.find('video'):
                 postFileName = str(postNum) + "(" + str(itemNo) + ")"
                 links.append([postFileName ,item.find('video')['src']])
-                log += str(datetime.now()) + "- element added successfully\n" 
+                log += str(datetime.now()) +"- " + str(postFileName) + " link added successfully\n" 
             else:
                 postFileName = str(postNum) + "(" + str(itemNo) + ")"
                 links.append([postFileName ,item.find('img')['src']])
-                log += str(datetime.now()) + "- element added successfully\n" 
-    elif elemType == "EMPTY":
-        log += str(datetime.now()) + "- element was empty\n" 
-    print elemType
+                log += str(datetime.now()) +"- " + str(postFileName) + " link added successfully\n" 
 
 def downloadLinks():
     #Downloading files
     global log
     fileNumber = 0
-    log += str(datetime.now()) + "- Initiated DOWNLOAD PROCESS\n"
+    log += str(datetime.now()) + "- Initiated DOWNLOAD process\n"
     for file in links:
         fileNumber += 1
         log += str(datetime.now()) + "- file " + str(fileNumber) + " - "
@@ -143,7 +144,7 @@ def downloadLinks():
                 print "Unknown extension"
             with open(loc, 'wb') as f:
                 f.write(r.content)
-            
+            print filename , "downloaded"
             log += "download successful\n"
         except:
             log += str(datetime.now()) + "- error downloading\n" 
@@ -155,19 +156,29 @@ def downloadLinks():
 #region MainCode
 
 log += str(datetime.now())+ "- Selenium initialization begin\n"
-driver = webdriver.Firefox(executable_path="drivers\geckodriver.exe")
-#If you want to use chrome driver
-#driver = webdriver.Chrome(executable_path="drivers\chromedriver.exe")
-driver.set_page_load_timeout(10)
-url = 'https://www.instagram.com/accounts/login/?source=auth_switcher'
-#driver.set_window_size(800,10000)
-driver.get(url)
-wait = WebDriverWait(driver, 10)
-driver.implicitly_wait(5)
-log += str(datetime.now())+ "- Instagram Loaded\n"
+
+#region Open Instagram login page
 try:
-    username = "" #put username here
-    password = "" # put password here
+    options = Options()
+    options.headless = True
+    driver = webdriver.Firefox(options=options, executable_path="drivers\geckodriver.exe")
+    #If you want to use chrome driver
+    #driver = webdriver.Chrome(executable_path="drivers\chromedriver.exe")
+    log += str(datetime.now())+ "- Browser load successful\n"
+    driver.set_page_load_timeout(10)
+    url = 'https://www.instagram.com/accounts/login/?source=auth_switcher'
+    driver.get(url)
+    driver.implicitly_wait(5)
+    log += str(datetime.now())+ "- Instagram loaded successfully\n"
+    print "Browser load successful"
+except Exception as e:
+    log += str(datetime.now())+ "- Error loading webpage"
+    print "Error loading browser"
+#endregion
+
+
+try:
+    #region SignIn and navigate to Saved posts page
     driver.find_element_by_name("username").send_keys(username)
     driver.find_element_by_name("password").send_keys(password)
     log += str(datetime.now()) + "- Username and Password fields populated\n"
@@ -186,29 +197,51 @@ try:
     saved = driver.find_element_by_xpath("/html/body/span/section/main/div/div[1]/a[3]")
     saved.click()
     log += str(datetime.now()) + "- Saved tab opened\n"
-
-
+    print "Reached Saved tab"
+    #endregion
     #Gathering all links
-    getAllATags()
-    with open('downloadLinks.txt', 'w') as f:
-        for item in links:
-            f.write("%s\n" % item)
+    try:
+        print "Getting links INITIATED"
+        getAllATags()
+    except Exception as e:
+        log += str(datetime.now()) + "- Error getting tag \n" + str(e)
 
-    log += "TOTAL " + str(len(links)) +" FILES TO DOWNLOAD\n" 
+    try:
+        log += str(datetime.now()) + "- Writing links to downloadLinks.txt \n"
+        print "Writing downloadLinks.txt -"
+        with open('downloadLinks.txt', 'w') as f:
+            for item in links:
+                f.write("%s\n" % item)  
+        print "successful \n"
+    except Exception as e:
+        log += str(datetime.now()) + "- Error writing downloading links \n"
+        print "failed \n"
+    
+
+    log += "TOTAL " + str(len(links)) +" FILES TO DOWNLOAD\n"
+    print str(len(links)) , " files to download "
+
     #Download all files
-    downloadLinks()
+    print "download begin"
+    try:
+        downloadLinks()
+        log += str(datetime.now()) + "- All files downloaded successfully \n"
+    except Exception as e:
+        print e
+        log += str(datetime.now()) + "- Error downloading \n" + str(e)
     
 finally:
     time.sleep(0.1)
     elapsedTime = datetime.now() - (startTime)
     timeTaken = str(divmod(elapsedTime.total_seconds(), 60))
-    log += timeTaken + "- Time Of COMPLETION\n"
-    log += "All Files downloaded\n" 
+    log += "Time elapsed - " + timeTaken + "\n"
+    print "Time elapsed - " , str(timeTaken)
     log += "Quitting browser****************************************"
+    driver.quit()
+    print "Browser closed"
     print("Writing log to log.txt")
     f= open("log.txt","w+")
     f.write(log)
     f.close()
-    driver.quit()
 
 #endregion
