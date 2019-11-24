@@ -50,26 +50,7 @@ def getAllATags():
 
 def scrollDOWN():
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-#def scrollUP():
-#    driver.execute_script("window.scrollTo(0, -1*document.body.scrollHeight);")
-    
-#def scrollPageToBottom():
-#    SCROLL_PAUSE_TIME = 0.5
-#    # Get scroll height
-#    last_height = driver.execute_script("return document.body.scrollHeight")
-#
-#    while True:
-#        # Scroll down to bottom
-#        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-#
-#        # Wait to load page
-#        time.sleep(SCROLL_PAUSE_TIME)
-#
-#        # Calculate new scroll height and compare with last scroll height
-#        new_height = driver.execute_script("return document.body.scrollHeight")
-#        if new_height == last_height:
-#            break
-#        last_height = new_height
+ 
 
 def findElemType(elemen):
     #check type using Beautiful soup
@@ -94,11 +75,7 @@ def elementContentLinkGrab(singleElement, postNum):
     log += str(datetime.now()) + "- element type is "  + elemType + "\n"
     if elemType == "Video":
         singleElement.send_keys(Keys.ENTER)
-        #postFlex = driver.find_elements_by_tag_name('article')[1]
         src = driver.find_element_by_tag_name('video').get_attribute('src')
-        #located = WebDriverWait(driver,3).until(EC.presence_of_element_located((By.NAME, "q")))
-        #postFlexsoup = soup(postFlex.get_attribute('innerHTML'),"html.parser")
-        #src = postFlexsoup.find('video')['src']
         links.append([postNum, src])
         log += str(datetime.now()) + "- element added successfully\n" 
     elif elemType == "Image":
@@ -147,69 +124,6 @@ def elementContentLinkGrab(singleElement, postNum):
         log += str(datetime.now()) + "- element was empty\n" 
     print elemType
 
-
-
-#def elementContentLinkGrab(singleElement, rowNum, colNum):
-#    global log
-#    elemType = findElemType(singleElement)
-#    log += str(datetime.now()) + "- element type is "  + elemType + "\n"
-#    if elemType == "Video":
-#        hrefXPATH = "html/body/span/section/main/div/div[2]/article/div/div/div[{0}]/div[{1}]/a".format(rowNum+1,colNum+1)
-#        elemSnip = driver.find_element_by_xpath(hrefXPATH)
-#        elemSnip.send_keys(Keys.ENTER)
-#        #video = driver.find_element_by_xpath("/html/body/div[3]/div[2]/div/article/div[1]/div/div/div[3]")
-#        # WE CAN USE BEAUTIFUL SOUP HERE
-#        videoPathElem = driver.find_element_by_xpath("/html/body/div[3]/div[2]/div/article/div[1]/div/div/div[1]/div/div/video")
-#        src = videoPathElem.get_attribute("src")
-#        #elementNumber = (rowNum+1)*
-#        links.append([rowNum, colNum,src])
-#        log += str(datetime.now()) + "- element added successfully\n" 
-#    elif elemType == "Image":
-#        src = singleElement.find('img')['src']
-#        links.append([rowNum, colNum,src])
-#        log += str(datetime.now()) + "- element added successfully\n" 
-#    elif elemType == "Carousel":
-#        # XPATH for ul containing all images /html/body/div[3]/div[2]/div/article/div[1]/div/div/div[2]/div/div/div/ul
-#        hrefXPATH = "html/body/span/section/main/div/div[2]/article/div/div/div[{0}]/div[{1}]/a".format(rowNum+1,colNum+1)
-#        elemSnip = driver.find_element_by_xpath(hrefXPATH)
-#        elemSnip.send_keys(Keys.ENTER)
-#        carouselPath = driver.find_element_by_xpath("html/body/div[3]/div[2]/div/article/div[1]/div/div/div[2]/div/div/div/ul")
-#        time.sleep(.1)
-#        carousel_soup = soup(carouselPath.get_attribute('innerHTML'), "html.parser")
-#        itemsSrcs = carousel_soup.find_all('video')
-#        for vidItem in itemsSrcs:
-#            for sibling in vidItem.next_siblings:
-#                sibling.decompose()
-#        itemsSrcs += carousel_soup.find_all('img')
-#        log += str(datetime.now()) + "- number of elements in carousel : " + str(len(itemsSrcs)) + "\n"
-#        for oneElem in itemsSrcs:
-#            src = oneElem['src']
-#            links.append([rowNum, colNum,src])
-#            log += str(datetime.now()) + "- element added successfully\n" 
-#    elif elemType == "EMPTY":
-#        log += str(datetime.now()) + "- element was empty\n" 
-    
-
-#def gettingLinks(flex_soup):
-#    #Creating rows element and counting rows
-#    global log
-#    log += str(datetime.now()) + "- Gathering links now\n"
-#    rows = flex_soup.find_all(True, recursive=False)
-#    log += str(datetime.now()) + "- Number of rows found" + str(len(rows)) + "\n"
-#    rowNumber = 0
-#    for row in rows:
-#        rowElements = row.find_all(True, recursive=False)
-#        columnNumber = 0
-#        for singleElement in rowElements:
-#            log += str(datetime.now()) + "- Working on element " + str(rowNumber) + "," + str(columnNumber) + "\n"
-#            try:
-#                elementContentLinkGrab(singleElement,rowNumber,columnNumber)
-#            except:
-#                log += str(datetime.now()) + "- error getting element" 
-#            columnNumber = columnNumber + 1
-#        rowNumber = rowNumber + 1
-#    
-
 def downloadLinks():
     #Downloading files
     global log
@@ -252,8 +166,8 @@ wait = WebDriverWait(driver, 10)
 driver.implicitly_wait(5)
 log += str(datetime.now())+ "- Instagram Loaded\n"
 try:
-    username = "asdn9651"
-    password = "xohowib778@imailto.net"
+    username = "" #put username here
+    password = "" # put password here
     driver.find_element_by_name("username").send_keys(username)
     driver.find_element_by_name("password").send_keys(password)
     log += str(datetime.now()) + "- Username and Password fields populated\n"
