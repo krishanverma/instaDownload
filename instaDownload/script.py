@@ -1,13 +1,19 @@
-import bs4
-import requests
-import urllib
-from bs4 import BeautifulSoup as soup
+#import bs4
+#import requests
+#import urllib
+#from bs4 import BeautifulSoup as soup
 
-star = "some\n"
-star += "thing"
-num = 5
-star += str(num) + "here"
-print(star)
+arr = ["a","b","c"]
+if "a" in arr !=False:
+    print "True"
+else:
+    print "No"
+
+#star = "some\n"
+#star += "thing"
+#num = 5
+#star += str(num) + "here"
+#print(star)
 #myurl= "fullHTML.html"
 #myurl= "recordedHTML.html"
 
