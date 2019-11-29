@@ -16,8 +16,8 @@ links = list()
 startTime = datetime.now()
 log = "" + str(startTime) + "- Script initiated\n"
 hrefList = list()
-username = "asdn9651" #USERNAME here
-password = "xohowib778@imailto.net" #PASSWORD here
+username = "" #USERNAME here
+password = "" #PASSWORD here
 options = Options()
 options.headless = True
 driver = webdriver.Firefox(options=options, executable_path="drivers\geckodriver.exe")
