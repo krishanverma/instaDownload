@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+import os
 #Selenium libraries
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -17,10 +18,23 @@ log = "" + str(startTime) + "- Script initiated\n"
 hrefList = list()
 username = "asdn9651" #USERNAME here
 password = "xohowib778@imailto.net" #PASSWORD here
+options = Options()
+options.headless = True
+driver = webdriver.Firefox(options=options, executable_path="drivers\geckodriver.exe")
 #endregion
 
 
 #region Functions
+def openBrowser():
+    global log
+    log += str(datetime.now())+ "- Browser load successful\n"
+    driver.set_page_load_timeout(10)
+    url = 'https://www.instagram.com/accounts/login/?source=auth_switcher'
+    driver.get(url)
+    driver.implicitly_wait(5)
+    log += str(datetime.now())+ "- Instagram loaded successfully\n"
+    print "Browser load successful"
+
 
 def getAllATags():
     global log
@@ -126,8 +140,21 @@ def elementContentLinkGrab(singleElement, postNum):
                 log += str(datetime.now()) +"- " + str(postFileName) + " link added successfully\n" 
 
 def downloadLinks():
-    #Downloading files
     global log
+
+    #Setting folders
+    time = datetime.now()
+    timeStamp = str(time.date()) + ' ' + str(time.hour) + str(time.minute) + str(time.second)
+    dirName = 'downloads/' + timeStamp
+    if not os.path.exists(dirName):
+        os.makedirs(dirName)
+        print("Directory " , dirName ,  " created ")
+        log += "Folder created successfully\n"
+    else:    
+        print("Directory " , dirName ,  " could not be created")
+        log += "Folder creation Error\n"
+
+    #Downloading files
     fileNumber = 0
     log += str(datetime.now()) + "- Initiated DOWNLOAD process\n"
     for file in links:
@@ -137,9 +164,9 @@ def downloadLinks():
             r = requests.get(file[1])
             filename = str(file[0])
             if r.headers['content-type'] == "video/mp4":
-                loc = "downloads/{0}.mp4".format(filename)
+                loc = "{0}/{1}.mp4".format(dirName, filename)
             elif r.headers['content-type'] == "image/jpeg":
-                loc = "downloads/{0}.jpeg".format(filename)
+                loc = "{0}/{1}.jpeg".format(dirName, filename)
             else:
                 print "Unknown extension"
             with open(loc, 'wb') as f:
@@ -159,18 +186,7 @@ log += str(datetime.now())+ "- Selenium initialization begin\n"
 
 #region Open Instagram login page
 try:
-    options = Options()
-    options.headless = True
-    driver = webdriver.Firefox(options=options, executable_path="drivers\geckodriver.exe")
-    #If you want to use chrome driver
-    #driver = webdriver.Chrome(executable_path="drivers\chromedriver.exe")
-    log += str(datetime.now())+ "- Browser load successful\n"
-    driver.set_page_load_timeout(10)
-    url = 'https://www.instagram.com/accounts/login/?source=auth_switcher'
-    driver.get(url)
-    driver.implicitly_wait(5)
-    log += str(datetime.now())+ "- Instagram loaded successfully\n"
-    print "Browser load successful"
+    openBrowser()
 except Exception as e:
     log += str(datetime.now())+ "- Error loading webpage"
     print "Error loading browser"
