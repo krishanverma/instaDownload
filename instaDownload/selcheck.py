@@ -1,3 +1,4 @@
+#Regular Python libraries
 import time
 from datetime import datetime
 import os
@@ -5,8 +6,9 @@ import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
-#BS4 libraries
+#To download files
 import requests
+#BS4 libraries
 import bs4
 from bs4 import BeautifulSoup as soup
 
@@ -19,15 +21,15 @@ hrefList = list()
 username = "" #USERNAME here
 password = "" #PASSWORD here
 options = Options()
-options.headless = True
+#options.headless = True
 driver = webdriver.Firefox(options=options, executable_path="drivers\geckodriver.exe")
+log += str(datetime.now())+ "- Browser load successful\n"
 #endregion
 
 
 #region Functions
 def openBrowser():
     global log
-    log += str(datetime.now())+ "- Browser load successful\n"
     driver.set_page_load_timeout(10)
     url = 'https://www.instagram.com/accounts/login/?source=auth_switcher'
     driver.get(url)
@@ -35,6 +37,8 @@ def openBrowser():
     log += str(datetime.now())+ "- Instagram loaded successfully\n"
     print "Browser load successful"
 
+#def deTagger():
+    
 
 def getAllATags():
     global log
@@ -43,7 +47,11 @@ def getAllATags():
     new_height = -1
     postNum = 0
     while True:
-        flex = driver.find_element_by_xpath("/html/body/span/section/main/div/div[2]/article/div/div") #XPATH for the FLEX
+        #/html/body/div[1]/section/main/div/div[2]/article/div/div
+        #/html/body/div[1]/section/main/div/div[2]/article/div[1]/div
+        flex = driver.find_element_by_xpath("/html/body/div[1]/section/main/div/div[2]/article/div[1]/div") #XPATH for the FLEX
+        #flex = driver.find_element_by_xpath("/html/body/span/section/main/div/div[2]/article/div/div") #XPATH for the FLEX
+        someNew = driver.find_element_by_tag_name("article")
         elems = flex.find_elements_by_tag_name("a")
         for item in elems:
             tagHREF = item.get_attribute("href")
@@ -55,6 +63,7 @@ def getAllATags():
                     log += str(datetime.now()) + "- Parsing element "+ str(postNum) +"\n"
                     elementContentLinkGrab(item,postNum)
                 except Exception as e:
+                    print "UNABLE TO PARSE ", tagHREF
                     log += str(datetime.now()) + "- Error parsing element \n"
 
         #now scrolling page
@@ -102,7 +111,8 @@ def elementContentLinkGrab(singleElement, postNum):
         log += str(datetime.now()) +"- " + str(postNum) + " link added successfully\n" 
     elif elemType == "Carousel":
         singleElement.send_keys(Keys.ENTER)
-        carouselPath = driver.find_element_by_xpath("html/body/div[3]/div[2]/div/article/div[1]/div/div/div[2]/div/div/div/ul")
+        #/html/body/div[4]/div[2]/div/article/div[1]/div/div/div[2]/div/div/div/div/ul
+        carouselPath = driver.find_element_by_xpath("/html/body/div[4]/div[2]/div/article/div[1]/div/div/div[2]/div/div/div/div/ul")
         #time.sleep(.1)
         carousel_soup = soup(carouselPath.get_attribute('innerHTML'), "html.parser")
         totalItems = len(carousel_soup)
@@ -142,7 +152,7 @@ def elementContentLinkGrab(singleElement, postNum):
 def downloadLinks():
     global log
 
-    #Setting folders
+    #Preparing folder
     time = datetime.now()
     timeStamp = str(time.date()) + ' ' + str(time.hour) + str(time.minute) + str(time.second)
     dirName = 'downloads/' + timeStamp
@@ -152,7 +162,7 @@ def downloadLinks():
         log += "Folder created successfully\n"
     else:    
         print("Directory " , dirName ,  " could not be created")
-        log += "Folder creation Error\n"
+        log += "Folder creation Error\n" 
 
     #Downloading files
     fileNumber = 0
@@ -189,7 +199,7 @@ try:
     openBrowser()
 except Exception as e:
     log += str(datetime.now())+ "- Error loading webpage"
-    print "Error loading browser"
+    print "Error loading webpage"
 #endregion
 
 
@@ -199,19 +209,11 @@ try:
     driver.find_element_by_name("password").send_keys(password)
     log += str(datetime.now()) + "- Username and Password fields populated\n"
     driver.implicitly_wait(5)
-    login = driver.find_element_by_xpath("/html/body/span/section/main/div/article/div/div[1]/div/form/div[4]")
+    login = driver.find_element_by_xpath("//button[contains(@type,'submit')]")
     login.click()
     log += str(datetime.now()) + "- Login pressed\n"
-    driver.implicitly_wait(5)
-    not_now = driver.find_element_by_xpath("/html/body/div[3]/div/div/div[3]/button[2]")
-    not_now.click()
-    log += str(datetime.now()) + "- Not now box clicked\n"
-    driver.implicitly_wait(5)
-    prof = driver.find_element_by_xpath("/html/body/span/section/nav/div[2]/div/div/div[3]/div/div[3]/a")
-    prof.click()
-    log += str(datetime.now()) + "- Profile page opened\n"
-    saved = driver.find_element_by_xpath("/html/body/span/section/main/div/div[1]/a[3]")
-    saved.click()
+    userUrl = str(driver.find_element_by_xpath("//*[@aria-label='Profile']/ancestor::a").get_attribute('href')) + 'saved'
+    driver.get(userUrl)
     log += str(datetime.now()) + "- Saved tab opened\n"
     print "Reached Saved tab"
     #endregion
